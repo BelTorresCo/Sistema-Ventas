@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Ventas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ LOGIN ============ -->
+  <section id="login" class="login hidden">
+    <div class="login-card">
+      <div class="brand big"><span class="logo">SV</span><div><b>Sistema de Ventas</b><small>Big Data Analytics · UPSJB</small></div></div>
+      <h1>Iniciar sesión</h1>
+      <form id="formLogin">
+        <label>Usuario<input name="usuario" autocomplete="username" required></label>
+        <label>Contraseña<input name="clave" type="password" autocomplete="current-password" required></label>
+        <button class="btn primary full" type="submit">Ingresar</button>
+        <p class="msg" id="loginMsg"></p>
+      </form>
+      <p class="hint">Datos en Azure SQL · Sistema publicado en Vercel</p>
+    </div>
+  </section>
+
+  <!-- ============ APLICACIÓN ============ -->
+  <section id="app" class="app hidden">
+    <aside class="side">
+      <div class="brand"><span class="logo">SV</span><div><b>Sistema de Ventas</b><small>Azure SQL · OLTP</small></div></div>
+      <nav>
+        <a href="#inicio"    data-view="inicio"><i>▦</i>Inicio</a>
+        <a href="#nueva"     data-view="nueva"><i>＋</i>Nueva venta</a>
+        <a href="#ventas"    data-view="ventas"><i>≡</i>Ventas</a>
+        <a href="#clientes"  data-view="clientes"><i>☺</i>Clientes</a>
+        <a href="#productos" data-view="productos"><i>▣</i>Productos</a>
+      </nav>
+      <div class="side-foot">
+        <div class="user"><span class="avatar" id="avatar">?</span><div><b id="userName">—</b><small id="userRol">—</small></div></div>
+        <button class="btn ghost full" id="btnSalir">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <button class="btn icon only-mobile" id="btnMenu" aria-label="Menú">☰</button>
+        <h2 id="titulo">Inicio</h2>
+        <span class="pill" id="estadoDb">Conectado a Azure SQL</span>
+      </header>
+
+      <!-- INICIO -->
+      <div class="view" id="v-inicio">
+        <div class="kpis" id="kpis"></div>
+        <div class="grid-2">
+          <div class="card"><h3>Ventas de los últimos 14 días (S/)</h3><div id="chartDias" class="chart"></div></div>
+          <div class="card"><h3>Ventas por método de pago</h3><div id="metodos"></div></div>
+        </div>
+        <div class="card"><h3>Top 5 productos por importe</h3><div id="topProductos"></div></div>
+      </div>
+
+      <!-- NUEVA VENTA -->
+      <div class="view" id="v-nueva">
+        <div class="grid-venta">
+          <div class="card">
+            <h3>Datos del comprobante</h3>
+            <div class="form-grid">
+              <label>Tipo de comprobante
+                <select id="vTipo"><option>BOLETA</option><option>FACTURA</option></select></label>
+              <label>Método de pago
+                <select id="vMetodo"><option>EFECTIVO</option><option>YAPE</option><option>PLIN</option><option>TARJETA</option><option>TRANSFERENCIA</option></select></label>
+              <label class="span-2">Cliente
+                <select id="vCliente"></select></label>
+              <label class="span-2">Vendedor
+                <select id="vVendedor"></select></label>
+            </div>
+            <h3 class="mt">Agregar producto</h3>
+            <div class="add-row">
+              <select id="vProducto"></select>
+              <input id="vCantidad" type="number" min="1" value="1" aria-label="Cantidad">
+              <button class="btn" id="btnAgregar">Agregar</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Detalle de la venta</h3>
+            <table class="tbl"><thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">P. unit.</th><th class="r">Importe</th><th></th></tr></thead>
+              <tbody id="carrito"><tr><td colspan="5" class="empty">Aún no hay productos</td></tr></tbody></table>
+            <div class="totales">
+              <div><span>Op. gravada</span><b id="tSub">S/ 0.00</b></div>
+              <div><span>IGV (18 %)</span><b id="tIgv">S/ 0.00</b></div>
+              <div class="grand"><span>Total</span><b id="tTotal">S/ 0.00</b></div>
+            </div>
+            <button class="btn primary full" id="btnRegistrar">Registrar venta</button>
+            <p class="msg" id="ventaMsg"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- VENTAS -->
+      <div class="view" id="v-ventas">
+        <div class="card">
+          <div class="toolbar">
+            <label>Desde<input type="date" id="fDesde"></label>
+            <label>Hasta<input type="date" id="fHasta"></label>
+            <button class="btn" id="btnFiltrar">Filtrar</button>
+            <span class="spacer"></span><span class="muted" id="ventasInfo"></span>
+          </div>
+          <div class="tbl-wrap"><table class="tbl hover">
+            <thead><tr><th>Comprobante</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th>Pago</th><th class="r">Total</th></tr></thead>
+            <tbody id="tVentas"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="view" id="v-clientes">
+        <div class="grid-side">
+          <div class="card">
+            <div class="toolbar"><input id="qCliente" placeholder="Buscar por nombre o documento…"><button class="btn" id="btnBuscarCli">Buscar</button></div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>Documento</th><th>Nombre</th><th>Distrito</th><th class="r">Compras</th><th class="r">Total S/</th></tr></thead>
+              <tbody id="tClientes"></tbody></table></div>
+          </div>
+          <div class="card">
+            <h3>Nuevo cliente</h3>
+            <form id="formCliente" class="form-grid">
+              <label>Tipo doc.<select name="tipo_documento"><option>DNI</option><option>RUC</option><option>CE</option></select></label>
+              <label>N.º documento<input name="nro_documento" required></label>
+              <label class="span-2">Nombres / Razón social<input name="nombres" required></label>
+              <label class="span-2">Apellidos<input name="apellidos"></label>
+              <label>Sexo<select name="sexo"><option value="">—</option><option value="F">F</option><option value="M">M</option></select></label>
+              <label>Nacimiento<input type="date" name="fecha_nacimiento"></label>
+              <label>Teléfono<input name="telefono"></label>
+              <label>Distrito<input name="distrito"></label>
+              <label class="span-2">Correo<input type="email" name="email"></label>
+              <button class="btn primary span-2" type="submit">Guardar cliente</button>
+              <p class="msg span-2" id="cliMsg"></p>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTOS -->
+      <div class="view" id="v-productos">
+        <div class="grid-side">
+          <div class="card">
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th class="r">Precio</th><th class="r">Costo</th><th class="r">Margen</th><th class="r">Stock</th><th></th></tr></thead>
+              <tbody id="tProductos"></tbody></table></div>
+          </div>
+          <div class="card">
+            <h3 id="prodTitulo">Nuevo producto</h3>
+            <form id="formProducto" class="form-grid">
+              <input type="hidden" name="id_producto">
+              <label>Código<input name="codigo" required></label>
+              <label>Categoría<select name="id_categoria" id="pCategoria"></select></label>
+              <label class="span-2">Nombre<input name="nombre" required></label>
+              <label class="span-2">Marca<input name="marca"></label>
+              <label>Precio venta<input type="number" step="0.01" min="0" name="precio_venta" required></label>
+              <label>Costo unitario<input type="number" step="0.01" min="0" name="costo_unitario" required></label>
+              <label>Stock<input type="number" min="0" step="1" name="stock" value="0"></label>
+              <label class="check"><input type="checkbox" name="activo" checked> Activo</label>
+              <button class="btn primary span-2" type="submit" id="btnGuardarProd">Guardar producto</button>
+              <button class="btn ghost span-2 hidden" type="button" id="btnCancelarProd">Cancelar edición</button>
+              <p class="msg span-2" id="prodMsg"></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Modal detalle de venta -->
+  <div class="modal hidden" id="modal"><div class="modal-box"><button class="btn icon close" id="modalClose" aria-label="Cerrar">✕</button><div id="modalBody"></div></div></div>
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "sistema-ventas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema web de ventas (OLTP) - Big Data Analytics - Azure SQL + Vercel",
+  "dependencies": {
+    "mssql": "^11.0.1"
+  }
+}
